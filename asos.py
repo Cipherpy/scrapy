@@ -9,5 +9,5 @@ class AsosSpider(BaseSpider):
 
     
 
-    def parse(self, response): # parse is the inbulit function we can not change the name
-       pass
+    def parse(self, response): # parse is the default callback method,if we change the name it wont work
+      name=response.xpath('h1').extract
