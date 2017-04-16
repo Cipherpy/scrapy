@@ -20,9 +20,8 @@ class MySpider(CrawlSpider):
         items = []
         
         for title in titles:
-            item = AsoswomenItem()
-            item["name"] = title.select(".//span[@class='name']/text()").extract()
-            item["price"] =title.select(".//span[@class='price']/text()").extract()
-            item["image"]=title.select(".//img/@src").extract()
-            items.append(item)
-        return items
+            #item = AsoswomenItem()
+            name = title.select(".//span[@class='name']/text()").extract()
+            price =title.select(".//span[@class='price']/text()").extract()
+            image=title.select(".//img/@src").extract()
+            yield{'Image':image,'Name':name,'Price':price}
