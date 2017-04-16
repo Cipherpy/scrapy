@@ -16,5 +16,6 @@ class MySpider(BaseSpider):
             item = AsoswomenItem()
             item["name"] = title.select(".//span[@class='name']/text()").extract()
             item["price"] =title.select(".//span[@class='price']/text()").extract()
+            item["image"]=title.select(".//img/@src").extract()
             items.append(item)
         return items
