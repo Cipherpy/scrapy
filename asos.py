@@ -1,33 +1,41 @@
-from scrapy.spider import CrawlSpider, Rule
-from scrapy.selector import HtmlXPathSelector
-from asoswomen.items import AsoswomenItem
-
-from scrapy.linkextractors import LinkExtractor
+# -*- coding: utf-8 -*-
+from scrapy import Spider
 from scrapy.http import Request
-from asoswomen.items import AsoswomenItem
+from scrapy.selector import HtmlXPathSelector
 
-class MySpider(CrawlSpider):
-    name = "asos"
-    allowed_domains = ["asos.com"]
-    start_urls = ["http://www.asos.com/women/accessories/cat/?cid=4174&pgesize=36"]
-    #rules = (
-        #Rule(LinkExtractor(allow=(), restrict_xpaths=('//li[@class="next"]',)), #callback="parse_items", follow= True),
-    #)
+class ProductsSpider(Spider):
+	name = "products"
+        allowed_domains = ["asos.com"]
+        start_urls = ['http://asos.com/women/']
+	def __init__(self,product=None):
+		self.product=product
 
-    def parse(self, response):
-        hxs = HtmlXPathSelector(response)
-        titles = hxs.xpath("//li[@class='product-container interactions']")
-        items = []
-	for title in titles:
-            #item = AsoswomenItem()
-            name = title.select(".//span[@class='name']/text()").extract()
-            price =title.select(".//span[@class='price']/text()").extract()
-            image=title.select(".//img/@src").extract()
-            yield{
-		'Image':image,
-		'Name':name,
-		'Price':price}
-	next_page_url=response.xpath(
-	'.//*[@class="next"]/a/@href').extract_first()
-	absolute_next_page_url=response.urljoin(next_page_url)
-	yield Request(absolute_next_page_url)
+
+    	def parse(self, response):
+		if self.product:
+			product_url=response.xpath('//a[text()[contains(.,"'+ self.product+ '")]]/@href').extract_first()
+			yield Request(response.urljoin(product_url),callback=self.parse_product)
+		else:
+			self.logger.info('Scrapping all links available in the women category.')
+			products=response.xpath('//*[@class="items"]/li/a/@href').extract()
+			
+			for product in products:
+				#print product
+				yield Request(response.urljoin(product),dont_filter=True,callback=self.parse_product)
+
+	def parse_product(self,response):
+		Product_typ=response.xpath('//*[@class="breadcrumb-current"]/text()').extract()
+		Product_type1 = response.xpath("//li[@class='product-container interactions']")
+		print Product_typ
+		for product_type in Product_type1:
+
+		        name = product_type.xpath(".//span[@class='name']/text()").extract()
+			price =product_type.xpath(".//span[@class='price']/text()").extract()
+			image=product_type.xpath(".//img/@src").extract()
+			yield{
+			
+			'Image':image,
+			'Product Type':Product_typ,
+			'Name':name,
+			'Price':price}
+
