@@ -39,3 +39,7 @@ class ProductsSpider(Spider):
 			'Name':name,
 			'Price':price}
 
+			next_page_url=response.xpath(
+			'.//*[@class="next"]/a/@href').extract_first()
+			absolute_next_page_url=response.urljoin(next_page_url)
+			yield Request(absolute_next_page_url,callback=self.parse_product)
